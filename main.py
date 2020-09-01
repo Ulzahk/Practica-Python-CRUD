@@ -1,42 +1,63 @@
 import sys
 
 
-clients = ['Pablo', 'Ricardo']
+clients = [
+    {
+        'name': 'Pablo',
+        'company': 'Google',
+        'email': 'pablo@google.com',
+        'position': 'Software Engineer'
+    },
+    {
+        'name': 'Ricardo',
+        'company': 'Facebook',
+        'email': 'ricardo@facebook.com',
+        'position': 'Data Engineer'
+    }
+]
 
 
-def create_client(client_name):
-    if client_name not in clients:
-        clients.append(client_name)
+def create_client(client):
+    if client not in clients:
+        clients.append(client)
     else:
         print('Client is already in the client\'s list')
 
 
 def list_clients():
+    print('[idx] | [name] | [company] | [email] | [position] \n')
     for idx, client in enumerate(clients):
-        print('{}: {}'.format(idx, client))
+        print('{uid} | {name} | {company} | {email} | {position}'.format(
+            uid = idx,
+            name = client['name'],
+            company = client['company'],
+            email = client['email'],
+            position = client['position']
+        ))
+    
+    print('')
 
 
-def update_client(client_name, updated_client_name):
-    if client_name in clients:
-        index = clients.index(client_name)
-        clients[index] = updated_client_name
+
+def update_client(index, update_client_field):
+    if index is not None:
+        clients[index].update(update_client_field)
     else:
         print('Client is not in clients list')
 
 
-def delete_client(client_name):
-    if client_name in clients:
-        clients.remove(client_name)
+def delete_client(index):
+    if index:
+        del clients[index]
     else:
         print('Client is not in client list')
 
 
-def search_client(client_name):
-    for client in clients:
-        if client != client_name:
-            continue
-        else:
-            return  True
+def search_client(index, client_name):
+    if index is not None:
+        print(clients[index])
+    else:
+        print('There is not a client call {} in the client\'s list'.format(client_name))
 
 
 def _print_welcome():
@@ -48,6 +69,15 @@ def _print_welcome():
     print('[U]pdate client')
     print('[D]elete client')
     print('[S]earch client')
+
+
+def _get_client_field(field_name):
+    field = None
+
+    while not field:
+        field = input('What is the client {}?: '.format(field_name))
+    
+    return field
 
 
 def _get_client_name():
@@ -66,33 +96,61 @@ def _get_client_name():
     return client_name
 
 
+def _get_client_index(client_name):
+    for idx, client in enumerate(clients):
+        if client['name'] == client_name:
+            return idx
+
+
+def _set_update_field():
+    updates = False
+    updated_client_field = {}
+
+    while not updates:
+        field = input('What field do you want to update? [name][company][email][position]: ').lower()
+
+        if field == 'exit':
+            updates = True
+            continue
+
+        field_value = input('What is the new {}?: '.format((field)).capitalize())
+
+        updated_client_field.setdefault(field, field_value)
+        
+        return updated_client_field
+
 if __name__ == '__main__':
     _print_welcome()
+
     command = input()
     command = command.upper()
+
     if command == 'C':
-        client_name = _get_client_name()
-        create_client(client_name)
+        client = {
+            'name': _get_client_field('name'),
+            'company': _get_client_field('company'),
+            'email': _get_client_field('email'),
+            'position': _get_client_field('position') 
+        }
+        create_client(client)
         list_clients()
     elif command == 'L':
         list_clients()
     elif command == 'D':
         client_name = _get_client_name()
-        delete_client(client_name)
+        index = _get_client_index(client_name)
+        delete_client(index)
         list_clients()
     elif command == 'U':
+        list_clients()
         client_name = _get_client_name()
-        updated_client_name = input('What is the updated client name?: ')
-        update_client(client_name, updated_client_name)
+        index = _get_client_index(client_name)
+        updated_client_field = _set_update_field()
+        update_client(index, updated_client_field)
         list_clients()
     elif command == 'S':
         client_name = _get_client_name()
-        found = search_client(client_name)
-
-        if found:
-            print('The client is in the client\'s list')
-        else:
-            print('The client: {} is not in our client\'s list'.format(client_name))
-
+        index = _get_client_index(client_name)
+        found = search_client(index , client_name)
     else:
         print('Invalid command')
